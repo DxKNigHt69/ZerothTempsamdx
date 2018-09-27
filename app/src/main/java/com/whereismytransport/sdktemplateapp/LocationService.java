@@ -14,6 +14,7 @@ import com.google.android.gms.location.LocationServices;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import androidx.annotation.NonNull;
@@ -97,6 +98,39 @@ public final class LocationService {
                 mFusedLocationProviderClient.removeLocationUpdates(mFusedLocationCallback);
             }
             mFusedLocationProviderClient = null;
+        }
+    }
+
+    public void addLocationListener(@NonNull LocationListener locationListener) {
+        if (locationListener == null) {
+            return;
+        }
+
+        mLocationListeners.add(new WeakReference<>(locationListener));
+
+        final Location location = mCurrentLocation;
+        if (location != null) {
+            for (WeakReference<LocationListener> weakListener : mLocationListeners) {
+                if (weakListener.get() != null) {
+                    weakListener.get().onLocationChanged(location);
+                }
+            }
+        }
+    }
+
+    public void removeLocationListener(@NonNull LocationListener locationListener) {
+        if (locationListener == null) {
+            return;
+        }
+
+        Iterator<WeakReference<LocationListener>> iterator = mLocationListeners.iterator();
+        while (iterator.hasNext()) {
+            WeakReference<LocationListener> weakListener = iterator.next();
+            if (weakListener.get() != null && weakListener.get() == locationListener) {
+                iterator.remove();
+            } else if (weakListener.get() == null) {
+                iterator.remove();
+            }
         }
     }
 
