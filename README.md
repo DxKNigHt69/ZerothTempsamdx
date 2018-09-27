@@ -1,5 +1,5 @@
 # SDKTemplateApp
-Android App to help developers use Journey Planner response models and Agency, Stops and Lines response models.
+Android App to help developers query the Journey Planner and use the relevant response models.
 
 The official Template Android Application for the [WhereIsMyTransport](https://www.whereismytransport.com) API.
 
@@ -15,12 +15,18 @@ Clone or download this project and open it in Android Studio.
 
 Log onto the developer portal and get your client key and secret.
 
-Setup your credentials in TransportAPI SDK.
+Setup your credentials in transportapisdk.xml
 
-```java
-// Setup your credentials.
-String clientId = "CLIENT_ID";
-String clientSecret = "CLIENT_SECRET";
+```xml
+<resources>
+
+    <!-- Transport API Client ID, replace with your own. -->
+    <string name="transportApiClientId" translatable="false"><!-- YOUR API CLIENT ID HERE --></string>
+
+    <!-- Transport API Client Secret, replace with your own. -->
+    <string name="transportApiClientSecret" translatable="false"><!-- YOUR API CLIENT SECRET HERE --></string>
+
+</resources>
 ```
 
 ##Features:
@@ -31,10 +37,6 @@ The template application uses our [Java SDK](https://github.com/WhereIsMyTranspo
 The template app takes journey planner response model and displays it in an activity.
 This demonstrates how you can use the WhereIsMyTransport SDK with the [Mapbox Maps SDK for Android](https://www.mapbox.com/help/first-steps-android-sdk/).
 
-
-
-* Agency
-*
 
 
 
