@@ -15,6 +15,12 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+    // Compile options for MapBox SDK.
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
 }
 
 dependencies {
@@ -23,6 +29,10 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.0.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.0-alpha2'
     implementation 'androidx.lifecycle:lifecycle-extensions:2.0.0'
+
+    implementation 'com.google.android.gms:play-services-location:15.0.1'
+
+    implementation 'com.mapbox.mapboxsdk:mapbox-android-sdk:6.5.0'
 
     implementation 'com.whereismytransport.transportapisdk:transportapisdk:1.0.1'
 }
