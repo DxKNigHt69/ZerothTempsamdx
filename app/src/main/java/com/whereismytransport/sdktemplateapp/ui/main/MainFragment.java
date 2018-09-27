@@ -6,12 +6,8 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
 import android.Manifest;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
@@ -19,12 +15,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat;
-import transportapisdk.AgencyQueryOptions;
-import transportapisdk.TransportApiClient;
-import transportapisdk.TransportApiClientSettings;
-import transportapisdk.TransportApiResult;
-import transportapisdk.models.Agency;
+import transportapisdk.models.Itinerary;
 
 import android.provider.Settings;
 import android.util.Log;
@@ -34,7 +25,6 @@ import android.view.ViewGroup;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.mapbox.mapboxsdk.annotations.Icon;
-import com.mapbox.mapboxsdk.annotations.IconFactory;
 import com.mapbox.mapboxsdk.annotations.Marker;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
@@ -43,7 +33,10 @@ import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.whereismytransport.sdktemplateapp.BitmapHelper;
+import com.whereismytransport.sdktemplateapp.MapboxHelper;
 import com.whereismytransport.sdktemplateapp.R;
+
+import java.util.List;
 
 public class MainFragment extends Fragment {
     private static final String LOG_TAG = "MainFragment";
@@ -94,25 +87,6 @@ public class MainFragment extends Fragment {
 
         // This ViewModel is scoped to this Fragment's parent Activity.
         mViewModel = ViewModelProviders.of(getActivity()).get(MainViewModel.class);
-
-//        Thread thread = new Thread(new Runnable() {
-//            @Override
-//            public void run() {
-//                Log.i(LOG_TAG, "starting query...");
-//
-//                String clientId = getString(R.string.transportApiClientId);
-//                String clientSecret = getString(R.string.transportApiClientSecret);
-//
-//                TransportApiClient defaultClient = new TransportApiClient(new TransportApiClientSettings(clientId, clientSecret));
-//
-//                TransportApiResult<List<Agency>> agencies = defaultClient.getAgencies(AgencyQueryOptions.defaultQueryOptions());
-//
-//                Log.i(LOG_TAG, "done");
-//
-//                Log.i(LOG_TAG, "agencies.data.size(): " + agencies.data.size());
-//            }
-//        });
-//        thread.start();
     }
 
     @Override
@@ -137,13 +111,13 @@ public class MainFragment extends Fragment {
                 public void onMapReady(MapboxMap mapboxMap) {
                     mMap = mapboxMap;
 
-                    setupViewModelRelations();
+                    setupViewModelConnections();
                 }
             });
         }
     }
 
-    private void setupViewModelRelations() {
+    private void setupViewModelConnections() {
         mViewModel.getLocation(getContext()).observe(this, new Observer<Location>() {
             @Override
             public void onChanged(Location location) {
@@ -196,6 +170,13 @@ public class MainFragment extends Fragment {
 
         mMap.addOnMapLongClickListener((@NonNull LatLng point) -> {
             mViewModel.setEndLocation(point);
+        });
+
+        mViewModel.getItineraries().observe(this, new Observer<List<Itinerary>>() {
+            @Override
+            public void onChanged(List<Itinerary> itineraries) {
+                MapboxHelper.drawItineraryOnMap(getContext(), mMap, itineraries.get(0));
+            }
         });
     }
 

@@ -1,9 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <!-- Width and height for waypoint markers on map. -->
+    <dimen name="waypoint_intermediate_map_marker_height">16dp</dimen>
+    <dimen name="waypoint_intermediate_map_marker_width">16dp</dimen>
     <dimen name="waypoint_start_map_marker_height">48dp</dimen>
     <dimen name="waypoint_start_map_marker_width">48dp</dimen>
     <dimen name="waypoint_end_map_marker_height">48dp</dimen>
     <dimen name="waypoint_end_map_marker_width">48dp</dimen>
+    <dimen name="waypoint_transfer_map_marker_height">48dp</dimen>
+    <dimen name="waypoint_transfer_map_marker_width">48dp</dimen>
+    <dimen name="waypoint_user_map_marker_height">48dp</dimen>
+    <dimen name="waypoint_user_map_marker_width">48dp</dimen>
+
+    <!-- Width of the line drawn on the map (itineraries/steps). -->
+    <dimen name="waypoint_map_line_width">1.5dp</dimen>
 
 </resources>
