@@ -3,5 +3,5 @@
 
     <string name="depart_taxi">Depart Taxi</string>
     <string name="board_taxi">Board Taxi</string>
-    <string name="minibus_taxi">Minibus Taxi</string>
+    <string name="share_taxi">Share Taxi</string>
 </resources>

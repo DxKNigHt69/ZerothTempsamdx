@@ -2,13 +2,13 @@ package com.whereismytransport.sdktemplateapp.ui.main;
 
 import android.content.Context;
 import android.location.Location;
-import android.util.Log;
 
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.whereismytransport.sdktemplateapp.LocationService;
 import com.whereismytransport.sdktemplateapp.R;
 import com.whereismytransport.sdktemplateapp.SDKTemplateApplication;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -90,11 +90,34 @@ public final class MainViewModel extends ViewModel {
                 double endLongitude = mEndLocationLiveData.getValue().getLongitude();
                 double endLatitude = mEndLocationLiveData.getValue().getLatitude();
 
-                // Only API Call. Only first itinerary
+                // Let's restrict our Journey call to only some Modes.
+                List<String> onlyModes = new ArrayList<>();
+                onlyModes.add("ShareTaxi");
+                onlyModes.add("Bus");
+                onlyModes.add("Rail");
+                // onlyModes.add("Ferry");
+                // onlyModes.add("Coach");
+                // onlyModes.add("Subway");
+                // onlyModes.add("Rail");
 
-                JourneyBodyOptions journeyBodyOptions = new JourneyBodyOptions(null, null, null, null, 1, null);
+                // Request only one Itinerary for now.
+                int numItineraries = 1;
 
-                TransportApiResult<Journey> journeyResult = tapiClient.postJourney(journeyBodyOptions, startLatitude, startLongitude, endLatitude, endLongitude, null);
+                JourneyBodyOptions journeyBodyOptions = new JourneyBodyOptions(
+                        null,
+                        null,
+                        onlyModes,
+                        null,
+                        numItineraries,
+                        null);
+
+                TransportApiResult<Journey> journeyResult = tapiClient.postJourney(
+                        journeyBodyOptions,
+                        startLatitude,
+                        startLongitude,
+                        endLatitude,
+                        endLongitude,
+                        null);
 
                 List<Itinerary> itineraries = journeyResult.data.getItineraries();
 

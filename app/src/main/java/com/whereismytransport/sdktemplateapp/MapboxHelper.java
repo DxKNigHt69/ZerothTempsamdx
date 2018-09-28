@@ -101,6 +101,17 @@ public final class MapboxHelper {
 
                         MarkerOptions hailMarker = convertHailToMarker(context, waypoint.getHail(), departureDate);
                         hailMarker.setIcon(waypointIcon);
+
+                        if (i == 0) {
+                            // Is this Hail Waypoint on the start of the Leg?
+
+                            hailMarker.setSnippet(context.getString(R.string.board_taxi));
+                        } else if (i == leg.getWaypoints().size() - 1) {
+                            // Is this Hail Waypoint on the end of the Leg?
+
+                            hailMarker.setSnippet(context.getString(R.string.depart_taxi));
+                        }
+
                         mapboxMap.addMarker(hailMarker);
 
                     }
@@ -150,8 +161,7 @@ public final class MapboxHelper {
 
         MarkerOptions hailMarker = new MarkerOptions();
         hailMarker.setPosition(stopLatLong);
-        hailMarker.setTitle(context.getString(R.string.minibus_taxi) + " - " + hailTime);
-        hailMarker.setSnippet(context.getString(R.string.depart_taxi));
+        hailMarker.setTitle(context.getString(R.string.share_taxi) + " - " + hailTime);
 
         return hailMarker;
     }
