@@ -1,5 +1,7 @@
 # SDKTemplateApp
 
+![WIMTLogo](https://www.whereismytransport.com/wp-content/themes/wpwimt/assets/images/logos/logo-black.svg)
+
 ###Thanks for checking out our Github profile. 
 [WhereIsMyTransport](https://www.whereismytransport.com) is all about public transport data. 
 We host our data on an API, and we've put together some resources on our Github to help people use the API.
