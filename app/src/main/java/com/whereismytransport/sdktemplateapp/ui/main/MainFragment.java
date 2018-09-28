@@ -6,6 +6,7 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -17,6 +18,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import transportapisdk.models.Itinerary;
 
+import android.os.Vibrator;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -24,6 +26,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.annotations.Icon;
 import com.mapbox.mapboxsdk.annotations.Marker;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
@@ -63,6 +66,9 @@ public class MainFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.main_fragment, container, false);
+
+        // Initialise the Mapbox instance.
+        Mapbox.getInstance(getContext(), getString(R.string.mapBoxAccessToken));
 
         mMapView = view.findViewById(R.id.mapView);
         mMapView.onCreate(savedInstanceState);
@@ -104,13 +110,11 @@ public class MainFragment extends Fragment {
         super.onResume();
 
         mMapView.onResume();
-// Check permission to get location
+
+        // Check permission to get location.
         if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_REQUEST_CODE);
         } else {
-
-            //
-
             mMapView.getMapAsync(new OnMapReadyCallback() {
                 @Override
                 public void onMapReady(MapboxMap mapboxMap) {
@@ -122,7 +126,7 @@ public class MainFragment extends Fragment {
         }
     }
 
-    //Connects MainViewModel to MainFragment
+    // Observe LiveData from the MainViewModel.
     private void setupViewModelConnections() {
         mViewModel.getLocation(getContext()).observe(this, new Observer<Location>() {
             @Override
@@ -179,13 +183,19 @@ public class MainFragment extends Fragment {
         });
 
         mMap.addOnMapLongClickListener((@NonNull LatLng point) -> {
+            try {
+                Vibrator vibrator = (Vibrator) getContext().getSystemService(Context.VIBRATOR_SERVICE);
+                vibrator.vibrate(50L);
+            } catch (SecurityException e) {
+                // Gotta have permission ¯\_(ツ)_/¯
+            }
+
             mViewModel.setEndLocation(point);
         });
 
         mViewModel.getItineraries().observe(this, new Observer<List<Itinerary>>() {
+
             @Override
-            // Only using first itinerary.
-            //TODO not null
             public void onChanged(List<Itinerary> itineraries) {
                 mMap.clear();
                 MapboxHelper.drawItineraryOnMap(getContext(), mMap, itineraries.get(0));
