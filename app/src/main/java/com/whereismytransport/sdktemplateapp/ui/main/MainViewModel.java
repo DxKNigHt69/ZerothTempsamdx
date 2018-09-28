@@ -90,6 +90,8 @@ public final class MainViewModel extends ViewModel {
                 double endLongitude = mEndLocationLiveData.getValue().getLongitude();
                 double endLatitude = mEndLocationLiveData.getValue().getLatitude();
 
+                // Only API Call. Only first itinerary
+
                 JourneyBodyOptions journeyBodyOptions = new JourneyBodyOptions(null, null, null, null, 1, null);
 
                 TransportApiResult<Journey> journeyResult = tapiClient.postJourney(journeyBodyOptions, startLatitude, startLongitude, endLatitude, endLongitude, null);

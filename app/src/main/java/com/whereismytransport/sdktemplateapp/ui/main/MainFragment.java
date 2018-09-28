@@ -101,10 +101,12 @@ public class MainFragment extends Fragment {
         super.onResume();
 
         mMapView.onResume();
-
+// Check permission to get location
         if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_REQUEST_CODE);
         } else {
+
+            //
 
             mMapView.getMapAsync(new OnMapReadyCallback() {
                 @Override
@@ -117,6 +119,7 @@ public class MainFragment extends Fragment {
         }
     }
 
+    //Connects MainViewModel to MainFragment
     private void setupViewModelConnections() {
         mViewModel.getLocation(getContext()).observe(this, new Observer<Location>() {
             @Override
@@ -174,6 +177,8 @@ public class MainFragment extends Fragment {
 
         mViewModel.getItineraries().observe(this, new Observer<List<Itinerary>>() {
             @Override
+            // Only using first itinerary.
+            //TODO not null
             public void onChanged(List<Itinerary> itineraries) {
                 MapboxHelper.drawItineraryOnMap(getContext(), mMap, itineraries.get(0));
             }

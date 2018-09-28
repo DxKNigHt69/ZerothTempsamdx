@@ -22,6 +22,9 @@ import transportapisdk.models.Leg;
 import transportapisdk.models.Point;
 import transportapisdk.models.Waypoint;
 
+//This is where the magic happens.
+
+
 public final class MapboxHelper {
 
     public static void drawItineraryOnMap(Context context, MapboxMap map, Itinerary itinerary) {

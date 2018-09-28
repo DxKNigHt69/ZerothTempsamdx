@@ -15,7 +15,7 @@ Clone or download this project and open it in Android Studio.
 
 Log onto the developer portal and get your client key and secret.
 
-Setup your credentials in transportapisdk.xml
+Setup your credentials in transportapisdk.xml in values/transportapisdk.xml
 
 ```xml
 <resources>
@@ -29,13 +29,15 @@ Setup your credentials in transportapisdk.xml
 </resources>
 ```
 
-##Features:
+## Features
 
 The template application uses our [Java SDK](https://github.com/WhereIsMyTransport/TransportApiSdk.Java/blob/master/README.md), so it has access to the same endpoints.
 
-#Journey Planner
+# Journey Planner
 The template app takes journey planner response model and displays it in an activity.
 This demonstrates how you can use the WhereIsMyTransport SDK with the [Mapbox Maps SDK for Android](https://www.mapbox.com/help/first-steps-android-sdk/).
+
+
 
 
 
