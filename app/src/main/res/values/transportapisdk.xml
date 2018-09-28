@@ -1,8 +1,8 @@
 <resources>
 
     <!-- Transport API Client ID, replace with your own. -->
-    <string name="transportApiClientId" translatable="false">58c171a5-e7f7-4085-b15b-dcf0488f8f68</string>
+    <string name="transportApiClientId" translatable="false"><!-- YOUR API CLIENT ID HERE --></string>
 
     <!-- Transport API Client Secret, replace with your own. -->
-    <string name="transportApiClientSecret" translatable="false">XVIq0Hor6c6U+eZOH/aDMM0Y7neTTEkxt+BVfxgw9kg=</string>
+    <string name="transportApiClientSecret" translatable="false"><!-- YOUR API CLIENT SECRET HERE --></string>
 </resources>

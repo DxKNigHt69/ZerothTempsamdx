@@ -21,9 +21,6 @@ public class MainActivity extends AppCompatActivity {
         // This ViewModel is scoped to child Fragments of this Activity.
         mViewModel = ViewModelProviders.of(this).get(MainViewModel.class);
 
-        // Initialise the Mapbox instance.
-        Mapbox.getInstance(this, getString(R.string.mapBoxAccessToken));
-
         if (savedInstanceState == null) {
             getSupportFragmentManager()
                     .beginTransaction()
