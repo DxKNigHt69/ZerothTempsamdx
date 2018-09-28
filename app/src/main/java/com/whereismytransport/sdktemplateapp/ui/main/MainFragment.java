@@ -15,11 +15,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import transportapisdk.AgencyQueryOptions;
-import transportapisdk.TransportApiClient;
-import transportapisdk.TransportApiClientSettings;
-import transportapisdk.TransportApiResult;
-import transportapisdk.models.Agency;
+import transportapisdk.models.Itinerary;
 
 import android.provider.Settings;
 import android.util.Log;
@@ -27,8 +23,20 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.mapbox.mapboxsdk.annotations.Icon;
+import com.mapbox.mapboxsdk.annotations.Marker;
+import com.mapbox.mapboxsdk.annotations.MarkerOptions;
+import com.mapbox.mapboxsdk.camera.CameraPosition;
+import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.maps.MapView;
+import com.mapbox.mapboxsdk.maps.MapboxMap;
+import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
+import com.whereismytransport.sdktemplateapp.BitmapHelper;
+import com.whereismytransport.sdktemplateapp.MapboxHelper;
 import com.whereismytransport.sdktemplateapp.R;
+
+import java.util.List;
 
 public class MainFragment extends Fragment {
     private static final String LOG_TAG = "MainFragment";
@@ -38,6 +46,11 @@ public class MainFragment extends Fragment {
     private MainViewModel mViewModel;
 
     private MapView mMapView;
+    private MapboxMap mMap;
+    private FloatingActionButton mCenterLocationButton;
+
+    private Marker mOriginMarker;
+    private Marker mDestinationMarker;
 
     public static MainFragment newInstance() {
         return new MainFragment();
@@ -48,8 +61,22 @@ public class MainFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.main_fragment, container, false);
 
-        mMapView = (MapView) view.findViewById(R.id.mapView);
+        mMapView = view.findViewById(R.id.mapView);
         mMapView.onCreate(savedInstanceState);
+
+        mCenterLocationButton = view.findViewById(R.id.centerLocationButton);
+        mCenterLocationButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mOriginMarker != null) {
+                    CameraPosition.Builder camPositionBuilder = new CameraPosition.Builder();
+                    camPositionBuilder.target(mOriginMarker.getPosition());
+                    camPositionBuilder.zoom(11.0);
+
+                    mMap.setCameraPosition(camPositionBuilder.build());
+                }
+            }
+        });
 
         return view;
     }
@@ -60,25 +87,6 @@ public class MainFragment extends Fragment {
 
         // This ViewModel is scoped to this Fragment's parent Activity.
         mViewModel = ViewModelProviders.of(getActivity()).get(MainViewModel.class);
-
-//        Thread thread = new Thread(new Runnable() {
-//            @Override
-//            public void run() {
-//                Log.i(LOG_TAG, "starting query...");
-//
-//                String clientId = getString(R.string.transportApiClientId);
-//                String clientSecret = getString(R.string.transportApiClientSecret);
-//
-//                TransportApiClient defaultClient = new TransportApiClient(new TransportApiClientSettings(clientId, clientSecret));
-//
-//                TransportApiResult<List<Agency>> agencies = defaultClient.getAgencies(AgencyQueryOptions.defaultQueryOptions());
-//
-//                Log.i(LOG_TAG, "done");
-//
-//                Log.i(LOG_TAG, "agencies.data.size(): " + agencies.data.size());
-//            }
-//        });
-//        thread.start();
     }
 
     @Override
@@ -97,14 +105,79 @@ public class MainFragment extends Fragment {
         if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_REQUEST_CODE);
         } else {
-            mViewModel.getLocation(getContext()).observe(this, new Observer<Location>() {
+
+            mMapView.getMapAsync(new OnMapReadyCallback() {
                 @Override
-                public void onChanged(Location location) {
-                    Log.i(LOG_TAG, "Location update!");
-                    // TODO: use the location update.
+                public void onMapReady(MapboxMap mapboxMap) {
+                    mMap = mapboxMap;
+
+                    setupViewModelConnections();
                 }
             });
         }
+    }
+
+    private void setupViewModelConnections() {
+        mViewModel.getLocation(getContext()).observe(this, new Observer<Location>() {
+            @Override
+            public void onChanged(Location location) {
+                Log.i(LOG_TAG, "Location update!");
+            }
+        });
+
+        mViewModel.getStartLocation().observe(this, new Observer<Location>() {
+            @Override
+            public void onChanged(Location location) {
+                if (mOriginMarker == null) {
+                    final int markerWidth = getContext().getResources().getDimensionPixelSize(R.dimen.waypoint_end_map_marker_width);
+                    final int markerHeight = getContext().getResources().getDimensionPixelSize(R.dimen.waypoint_end_map_marker_height);
+
+                    Icon icon = BitmapHelper.getVectorAsMapBoxIcon(getContext(), R.drawable.ic_map_pin_a, markerWidth, markerHeight);
+                    MarkerOptions markerOptions = new MarkerOptions();
+                    markerOptions.setIcon(icon);
+
+                    markerOptions.setPosition(new LatLng(location));
+                    mOriginMarker = mMap.addMarker(markerOptions);
+                } else {
+                    mOriginMarker.setPosition(new LatLng(location));
+                }
+
+                CameraPosition.Builder camPositionBuilder = new CameraPosition.Builder();
+                camPositionBuilder.target(mOriginMarker.getPosition());
+                camPositionBuilder.zoom(11.0);
+
+                mMap.setCameraPosition(camPositionBuilder.build());
+            }
+        });
+
+        mViewModel.getEndLocation().observe(this, new Observer<LatLng>() {
+            @Override
+            public void onChanged(LatLng location) {
+                if (mDestinationMarker == null) {
+                    final int markerWidth = getContext().getResources().getDimensionPixelSize(R.dimen.waypoint_end_map_marker_width);
+                    final int markerHeight = getContext().getResources().getDimensionPixelSize(R.dimen.waypoint_end_map_marker_height);
+
+                    Icon icon = BitmapHelper.getVectorAsMapBoxIcon(getContext(), R.drawable.ic_map_pin_b, markerWidth, markerHeight);
+                    MarkerOptions markerOptions = new MarkerOptions();
+                    markerOptions.setIcon(icon);
+                    markerOptions.setPosition(location);
+                    mDestinationMarker = mMap.addMarker(markerOptions);
+                } else {
+                    mDestinationMarker.setPosition(location);
+                }
+            }
+        });
+
+        mMap.addOnMapLongClickListener((@NonNull LatLng point) -> {
+            mViewModel.setEndLocation(point);
+        });
+
+        mViewModel.getItineraries().observe(this, new Observer<List<Itinerary>>() {
+            @Override
+            public void onChanged(List<Itinerary> itineraries) {
+                MapboxHelper.drawItineraryOnMap(getContext(), mMap, itineraries.get(0));
+            }
+        });
     }
 
     @Override
