@@ -1,6 +1,6 @@
 <resources>
 
     <!-- MapBox SDK Access Token, replace with your own. -->
-    <string name="mapBoxAccessToken" translatable="false">pk.eyJ1IjoiYXJuZXdpbXQiLCJhIjoiY2pta2RhdzlvMG44NzN4bmp1bzU1OWpqcCJ9.hd6iyNilfbmPjg2TcV9iYA</string>
+    <string name="mapBoxAccessToken" translatable="false"><!-- YOUR ACCESS TOKEN HERE --></string>
 
 </resources>
