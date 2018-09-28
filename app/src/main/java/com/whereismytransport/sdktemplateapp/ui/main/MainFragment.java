@@ -49,7 +49,10 @@ public class MainFragment extends Fragment {
     private MapboxMap mMap;
     private FloatingActionButton mCenterLocationButton;
 
+    private MarkerOptions mOriginMarkerOptions;
     private Marker mOriginMarker;
+
+    private MarkerOptions mDestinationMarkerOptions;
     private Marker mDestinationMarker;
 
     public static MainFragment newInstance() {
@@ -141,8 +144,10 @@ public class MainFragment extends Fragment {
 
                     markerOptions.setPosition(new LatLng(location));
                     mOriginMarker = mMap.addMarker(markerOptions);
+                    mOriginMarkerOptions = markerOptions;
                 } else {
                     mOriginMarker.setPosition(new LatLng(location));
+                    mOriginMarkerOptions.setPosition(new LatLng(location));
                 }
 
                 CameraPosition.Builder camPositionBuilder = new CameraPosition.Builder();
@@ -165,8 +170,10 @@ public class MainFragment extends Fragment {
                     markerOptions.setIcon(icon);
                     markerOptions.setPosition(location);
                     mDestinationMarker = mMap.addMarker(markerOptions);
+                    mDestinationMarkerOptions = markerOptions;
                 } else {
                     mDestinationMarker.setPosition(location);
+                    mDestinationMarkerOptions.setPosition(location);
                 }
             }
         });
@@ -180,7 +187,10 @@ public class MainFragment extends Fragment {
             // Only using first itinerary.
             //TODO not null
             public void onChanged(List<Itinerary> itineraries) {
+                mMap.clear();
                 MapboxHelper.drawItineraryOnMap(getContext(), mMap, itineraries.get(0));
+                mMap.addMarker(mOriginMarkerOptions);
+                mMap.addMarker(mDestinationMarkerOptions);
             }
         });
     }
