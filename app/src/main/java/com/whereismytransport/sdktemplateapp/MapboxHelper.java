@@ -4,184 +4,178 @@ import android.content.Context;
 import android.graphics.Color;
 
 import com.mapbox.mapboxsdk.annotations.Icon;
-import com.mapbox.mapboxsdk.annotations.Marker;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
 import com.mapbox.mapboxsdk.annotations.PolylineOptions;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 
+import java.text.DateFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Locale;
+import java.util.TimeZone;
 
+import androidx.annotation.Nullable;
+import transportapisdk.models.Hail;
 import transportapisdk.models.Itinerary;
 import transportapisdk.models.Leg;
+import transportapisdk.models.LineString;
 import transportapisdk.models.Point;
+import transportapisdk.models.Stop;
 import transportapisdk.models.Waypoint;
 
 public final class MapboxHelper {
 
-    public static void drawItineraryOnMap(Context context, MapboxMap map, Itinerary itinerary) {
-        final int lineWidthPixels = context.getResources().getDimensionPixelSize(R.dimen.waypoint_map_line_width);
+    public static void drawItineraryOnMap(final Context context, final MapboxMap mapboxMap, final Itinerary itinerary) {
+
+        // The width of all Polylines to be drawn on the map.
+        final int mapLineWidthPixels = context.getResources().getDimensionPixelSize(R.dimen.waypoint_map_line_width);
+
+        // Dimensions of markers that represent intermediate stop Waypoints on the map.
         final int markerWidth = context.getResources().getDimensionPixelSize(R.dimen.waypoint_intermediate_map_marker_width);
         final int markerHeight = context.getResources().getDimensionPixelSize(R.dimen.waypoint_intermediate_map_marker_height);
-        final int transferMarkerWidth = context.getResources().getDimensionPixelSize(R.dimen.waypoint_transfer_map_marker_width);
-        final int transferMarkerHeight = context.getResources().getDimensionPixelSize(R.dimen.waypoint_transfer_map_marker_height);
 
+        // An Itinerary consists of Legs. A Leg can be either a Transit Leg, or a Walking Leg.
+        // We'll loop over each Leg in the Itinerary and add it to a Mapbox Polyline for drawing
+        // it on the map.
         for (Leg leg : itinerary.getLegs()) {
-            ArrayList<LatLng> legList = new ArrayList<>();
-            for (List<Double> p : leg.getGeometry().getCoordinates()) {
-                legList.add(new LatLng(p.get(1), p.get(0)));
-            }
 
-            PolylineOptions line = new PolylineOptions();
-            line.addAll(legList);
+            // Polyline is a Mapbox construct that we need in order to draw our Leg on the line.
+            final PolylineOptions legPolyline = convertLegGeometryToPolyline(leg);
+            legPolyline.width(mapLineWidthPixels);
+
+            // Let's draw Walking Legs and Transit Legs slightly differently. To do this, check
+            // the Leg Type, either Walking or Transit.
+
             if (leg.getType().equalsIgnoreCase("walking")) {
-                line.color(Color.BLACK);
-                line.width(lineWidthPixels);
-            } else {
-                line.color(Color.parseColor(leg.getLine().getColour()));
-                line.width(lineWidthPixels);
+                // Draw the Walking Leg.
 
-                Icon transferIcon = BitmapHelper.getVectorAsMapBoxIcon(context, R.drawable.ic_start_and_end_of_leg_icon, transferMarkerWidth, transferMarkerHeight);
-                Icon stopIcon = BitmapHelper.getIntermediateStopAsMapBoxIcon(context, markerWidth, markerHeight, Color.parseColor(leg.getLine().getColour()));
+                // We'll draw a Walking Leg is a simple black line.
+                legPolyline.color(Color.BLACK);
+
+            } else if (leg.getType().equalsIgnoreCase("transit")) {
+                // Draw the Transit Leg.
+
+                // We'll draw a Transit Leg in the colour of the Transit Leg's Line colour. We can
+                // get a String representation of the colour from the Leg.
+                String lineColourString = leg.getLine().getColour();
+
+                // Convert the colour String to a packed int colour.
+                int packedIntLineColour = Color.parseColor(lineColourString);
+
+                // Colour the PolyLine.
+                legPolyline.color(packedIntLineColour);
+
+                // We'll draw all our intermediate Waypoints with the same colour as the Line colour.
+                Icon waypointIcon = BitmapHelper.getIntermediateStopAsMapBoxIcon(context, markerWidth, markerHeight, packedIntLineColour);
+
+                // We'll now loop over each Waypoint in the Leg and add all the Waypoints to be
+                // drawn! A Waypoint can be one of three different types, either Walking,
+                // Stop, or Hail. Since we're dealing with a Transit Leg here, no Walking Waypoints
+                // will occur, so we can ignore them and focus only on Stop and Hail Waypoints.
 
                 for (int i = 0; i < leg.getWaypoints().size(); i++) {
-                    Waypoint waypoint = leg.getWaypoints().get(i);
 
-                    Date dateTime = null;
+                    final Waypoint waypoint = leg.getWaypoints().get(i);
+
+                    Date departureDate;
                     try {
-                        dateTime = DateHelper.parseIsoDateString(waypoint.getDepartureTime());
-                    } catch (ParseException e) { }
-
-                    MarkerOptions stopMarker = new MarkerOptions();
-                    if (waypoint.getStop() != null) {
-                        stopMarker.setPosition(new LatLng(waypoint.getStop().getGeometry().getCoordinates()[1], waypoint.getStop().getGeometry().getCoordinates()[0]));
-                        stopMarker.setTitle(waypoint.getStop().getName() + " - " + TimeFormattingHelper.formatDate(dateTime));
-                        stopMarker.setSnippet(waypoint.getStop().getAgency().getName());
-                        stopMarker.setIcon(stopIcon);
-                        if (i == 0 || i == leg.getWaypoints().size() - 1) {
-                            //stopMarker.setIcon(transferIcon);
-                        }
-                    } else if (waypoint.getHail() != null) {
-                        Point point = (Point) waypoint.getHail().getGeometry();
-                        stopMarker.setPosition(new LatLng(point.getCoordinates()[1], point.getCoordinates()[0]));
-                        stopMarker.setTitle(context.getString(R.string.minibus_taxi) + " - " + TimeFormattingHelper.formatDate(dateTime));
-                        stopMarker.setSnippet(context.getString(R.string.depart_taxi));
-                        stopMarker.setIcon(transferIcon);
-                    } else if (waypoint.getDropOffType() != null) {
-                        Point point = (Point) waypoint.getLocation().getGeometry();
-                        stopMarker.setPosition(new LatLng(point.getCoordinates()[1], point.getCoordinates()[0]));
-                        stopMarker.setTitle(context.getString(R.string.minibus_taxi) + " - " + TimeFormattingHelper.formatDate(dateTime));
-                        stopMarker.setSnippet(context.getString(R.string.board_taxi));
-                        stopMarker.setIcon(transferIcon);
+                        departureDate = parseIsoDateString(waypoint.getDepartureTime());
+                    } catch (ParseException e) {
+                        departureDate = null;
                     }
 
-                    map.addMarker(stopMarker);
+                    if (waypoint.getStop() != null) {
+                        // This Waypoint represents a formal Stop.
+
+                        MarkerOptions stopMarker = convertStopToMarker(waypoint.getStop(), departureDate);
+                        stopMarker.setIcon(waypointIcon);
+                        mapboxMap.addMarker(stopMarker);
+
+                    } else if (waypoint.getHail() != null) {
+                        // This Waypoint represents an informal Hailing section.
+
+                        MarkerOptions hailMarker = convertHailToMarker(context, waypoint.getHail(), departureDate);
+                        hailMarker.setIcon(waypointIcon);
+                        mapboxMap.addMarker(hailMarker);
+
+                    }
                 }
             }
 
-            map.addPolyline(line);
+            mapboxMap.addPolyline(legPolyline);
         }
     }
 
-//    public static Map<String, Marker> drawStepsOnMap(Context context, MapboxMap map, List<StepModel> steps) {
-//
-//        HashMap<String, Marker> markerMap = new HashMap<>();
-//
-//        for (StepModel step : steps) {
-//            if (step.getStepType() == StepModel.StepType.TRANSIT) {
-//                markerMap.putAll(drawTransitStepOnMap(context, map, (TransitStepModel) step));
-//            } else if (step.getStepType() == StepModel.StepType.WALKING) {
-//                drawWalkingStepOnMap(context, map, (WalkingStepModel) step);
-//            }
-//        }
-//
-//        return markerMap;
-//    }
-//
-//    public static Map<String, Marker> drawTransitStepOnMap(Context context, MapboxMap map, TransitStepModel transitStep) {
-//        final int lineWidthPixels = context.getResources().getDimensionPixelSize(R.dimen.waypoint_map_line_width);
-//        final int markerWidth = context.getResources().getDimensionPixelSize(R.dimen.waypoint_intermediate_map_marker_width);
-//        final int markerHeight = context.getResources().getDimensionPixelSize(R.dimen.waypoint_intermediate_map_marker_height);
-//        final int transferMarkerWidth = context.getResources().getDimensionPixelSize(R.dimen.waypoint_transfer_map_marker_width);
-//        final int transferMarkerHeight = context.getResources().getDimensionPixelSize(R.dimen.waypoint_transfer_map_marker_height);
-//
-//        Map<String, Marker> markerMap = new HashMap<>();
-//
-//        PolylineOptions line = new PolylineOptions();
-//        line.addAll(convertPointsToLatLng(transitStep.getTrip().getGeometryList()));
-//
-//        int lineColourPackedInt = Color.parseColor(transitStep.getTrip().getLine().getColour());
-//
-//        line.color(lineColourPackedInt);
-//        line.width(lineWidthPixels);
-//
-//        Icon transferIcon = BitmapHelper.getVectorAsMapBoxIcon(context, R.drawable.ic_start_and_end_of_leg_icon, transferMarkerWidth, transferMarkerHeight);
-//        Icon stopIcon = BitmapHelper.getIntermediateStopAsMapBoxIcon(context, markerWidth, markerHeight, lineColourPackedInt);
-//
-//        final int numWaypoints = transitStep.getTrip().getWaypoints().size();
-//        for (int i = 0; i < numWaypoints; i++) {
-//            final WaypointModel waypoint = transitStep.getTrip().getWaypoints().get(i);
-//
-//            Date dateTime = waypoint.getDepartureTime();
-//
-//            MarkerOptions stopMarker = new MarkerOptions();
-//            stopMarker.setPosition(new LatLng(waypoint.getGeometry().getLatitude(), waypoint.getGeometry().getLongitude()));
-//
-//            if (waypoint.getWaypointType() == WaypointModel.WaypointType.STOP) {
-//                final StopWaypointModel stopWaypoint = (StopWaypointModel) waypoint;
-//
-//                stopMarker.setTitle(stopWaypoint.getStop().getName());
-//                stopMarker.setSnippet(stopWaypoint.getStop().getAgency().getName());
-//                stopMarker.setIcon(stopIcon);
-//                if (i == 0 || i == numWaypoints - 1) {
-//                    stopMarker.setIcon(transferIcon);
-//                }
-//                markerMap.put(stopWaypoint.getStop().getId(), map.addMarker(stopMarker));
-//            } else if (waypoint.getWaypointType() == WaypointModel.WaypointType.HAIL) {
-//
-//                stopMarker.setTitle(context.getString(R.string.minibus_taxi) + " - " + TimeFormattingHelper.formatDate(dateTime));
-//
-//                if (i == 0) {
-//                    stopMarker.setSnippet(context.getString(R.string.board_taxi));
-//                } else if (i == numWaypoints - 1) {
-//                    stopMarker.setSnippet(context.getString(R.string.depart_taxi));
-//                }
-//
-//                stopMarker.setIcon(transferIcon);
-//                map.addMarker(stopMarker);
-//            }
-//        }
-//
-//        map.addPolyline(line);
-//
-//        return markerMap;
-//    }
-//
-//    public static void drawWalkingStepOnMap(Context context, MapboxMap map, WalkingStepModel walkingStep) {
-//        final int lineWidthPixels = context.getResources().getDimensionPixelSize(R.dimen.waypoint_map_line_width);
-//
-//        PolylineOptions line = new PolylineOptions();
-//        line.addAll(convertPointsToLatLng(walkingStep.getTrip().getGeometryList()));
-//        line.color(Color.BLACK);
-//        line.width(lineWidthPixels);
-//
-//        map.addPolyline(line);
-//    }
-//
-//    public static List<LatLng> convertPointsToLatLng(List<Point> points) {
-//        ArrayList<LatLng> latLngList = new ArrayList<>();
-//        for (Point p : points) {
-//            latLngList.add(fromPoint(p));
-//        }
-//        return latLngList;
-//    }
-//
-//    public static LatLng fromPoint(Point point) {
-//        return new LatLng(point.getLatitude(), point.getLongitude());
-//    }
+    private static PolylineOptions convertLegGeometryToPolyline(Leg leg) {
+        // A LineString contains all the coordinates that represent this Leg. This is what we
+        // need to draw a nice long line on the map.
+        LineString lineString = leg.getGeometry();
+
+        // Convert the LineString into a List LatLng points so we can draw it on our map.
+        ArrayList<LatLng> coordinateList = new ArrayList<>();
+        for (List<Double> coordinates : lineString.getCoordinates()) {
+            // Latitude - Longitude :)
+            coordinateList.add(new LatLng(coordinates.get(1), coordinates.get(0)));
+        }
+
+        PolylineOptions polyLine = new PolylineOptions();
+        polyLine.addAll(coordinateList);
+
+        return polyLine;
+    }
+
+    private static MarkerOptions convertStopToMarker(Stop stop, @Nullable Date departureDate) {
+        String stopTime = departureDate != null ? formatDate(departureDate) : "(No time available)";
+
+        LatLng stopLatLong = new LatLng(stop.getGeometry().getCoordinates()[1], stop.getGeometry().getCoordinates()[0]);
+
+        MarkerOptions stopMarker = new MarkerOptions();
+        stopMarker.setPosition(stopLatLong);
+        stopMarker.setTitle(stop.getName() + " - " + stopTime);
+        stopMarker.setSnippet(stop.getAgency().getName());
+
+        return stopMarker;
+    }
+
+    private static MarkerOptions convertHailToMarker(Context context, Hail hail, @Nullable Date departureDate) {
+        String hailTime = departureDate != null ? formatDate(departureDate) : "(No time available)";
+
+        Point point = (Point) hail.getGeometry();
+        LatLng stopLatLong = new LatLng(point.getCoordinates()[1], point.getCoordinates()[0]);
+
+        MarkerOptions hailMarker = new MarkerOptions();
+        hailMarker.setPosition(stopLatLong);
+        hailMarker.setTitle(context.getString(R.string.minibus_taxi) + " - " + hailTime);
+        hailMarker.setSnippet(context.getString(R.string.depart_taxi));
+
+        return hailMarker;
+    }
+
+    /**
+     * Parses a string representation of a date.
+     *
+     * @param isoDateString A date string in the format yyyy-MM-dd'T'HH:mm:ss'Z'}.
+     * @return A {@link Date} instance in the UTC timezone.
+     * @throws ParseException If the isoDateString is invalid.
+     */
+    private static Date parseIsoDateString(String isoDateString) throws ParseException {
+        DateFormat isoDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault());
+        isoDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+
+        if (isoDateString.length() > 21) {
+            isoDateString = isoDateString.substring(0, 19) + "Z";
+        }
+
+        return isoDateFormat.parse(isoDateString);
+    }
+
+    private static String formatDate(Date dateTime) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm");
+        dateFormat.setTimeZone(TimeZone.getDefault());
+        return dateFormat.format(dateTime);
+    }
 }
