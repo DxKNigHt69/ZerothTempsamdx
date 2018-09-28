@@ -27,9 +27,7 @@ import transportapisdk.models.Point;
 import transportapisdk.models.Stop;
 import transportapisdk.models.Waypoint;
 
-//This is where the magic happens.
-
-
+// This is where the magic happens.
 public final class MapboxHelper {
 
     public static void drawItineraryOnMap(final Context context, final MapboxMap mapboxMap, final Itinerary itinerary) {
