@@ -2,7 +2,7 @@
 
 ![WIMTLogo](https://www.whereismytransport.com/wp-content/themes/wpwimt/assets/images/logos/logo-black.svg)
 
-###Thanks for checking out our Github profile. 
+### Thanks for checking out our Github profile. 
 [WhereIsMyTransport](https://www.whereismytransport.com) is all about public transport data. 
 We host our data on an API, and we've put together some resources on our Github to help people use the API.
 
@@ -57,9 +57,9 @@ The template application uses our [Java SDK](https://github.com/WhereIsMyTranspo
 * Provides VectorDrawables for use as waypoint map-markers and map pins to mark out the beginning and end of journeys, intermediate stops and lines.
 
 ## Simple and easy to understand Main Activity
-* An easy way to understand how to piece together a Main Activity with a Main Fragment and a MainViewModel to 
+* An easy way to understand how to piece together a Main Activity with a Main Fragment and a MainViewModel to handle queries to the API.
 
-## Get in touch
+# Get in touch
 Get in touch with us on Support@whereismytransport.com for feature suggestions. 
 
 # License
