@@ -16,9 +16,9 @@ To integrate your own Android application with our API check out [TransportAPISd
 
 ## Get going
 
-* Clone or download this project and open it in Android Studio.
-* Log onto the developer portal and get your client key and secret.
-* Setup your credentials for the WIMT API in /app/src/res/values/transportapisdk.xml
+1. Clone or download this project and open it in Android Studio.
+1. Log onto the developer portal and get your client key and secret.
+1. Setup your credentials for the WIMT API in /app/src/res/values/transportapisdk.xml
 
 ```xml
 <resources>
@@ -32,7 +32,7 @@ To integrate your own Android application with our API check out [TransportAPISd
 </resources>
 ```
 
-* Setup your Mapbox token in /app/src/res/values/mapboxsdk.xml
+1. Setup your Mapbox token in /app/src/res/values/mapboxsdk.xml
 
 ```xml
 <resources>
@@ -42,6 +42,8 @@ To integrate your own Android application with our API check out [TransportAPISd
 
 </resources>
 ```
+
+1. Hit Run! We recommend running and testing the app on a physical device rather than a virtual device.
 
 
 # Features
@@ -67,3 +69,5 @@ SDKTemplateApp is available under the MIT license.
 We encourage you to use this code, change it, and keep it open-source.
 
 
+![screenshot](https://github.com/WhereIsMyTransport/SDKTemplateApp/blob/master/JourneyPlanScreenshot.jpg)
+    
