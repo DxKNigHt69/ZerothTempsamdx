@@ -69,5 +69,5 @@ SDKTemplateApp is available under the MIT license.
 We encourage you to use this code, change it, and keep it open-source.
 
 
-![screenshot](SDKTemplateApp/JourneyPlanScreenshot.jpg)
+![screenshot](https://github.com/WhereIsMyTransport/SDKTemplateApp/blob/master/JourneyPlanScreenshot.jpg)
     
