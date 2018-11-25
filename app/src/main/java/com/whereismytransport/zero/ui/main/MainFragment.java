@@ -1,4 +1,4 @@
-package com.whereismytransport.sdktemplateapp.ui.main;
+package com.whereismytransport.zero.ui.main;
 
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -9,6 +9,11 @@ import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
@@ -24,6 +29,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.mapbox.mapboxsdk.Mapbox;
@@ -35,11 +42,13 @@ import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
-import com.whereismytransport.sdktemplateapp.BitmapHelper;
-import com.whereismytransport.sdktemplateapp.MapboxHelper;
-import com.whereismytransport.sdktemplateapp.R;
+import com.whereismytransport.zero.BitmapHelper;
+import com.whereismytransport.zero.MapboxHelper;
+import com.whereismytransport.zero.R;
 
 import java.util.List;
+
+import static com.mapbox.mapboxsdk.Mapbox.getApplicationContext;
 
 public class MainFragment extends Fragment {
     private static final String LOG_TAG = "MainFragment";
@@ -50,13 +59,17 @@ public class MainFragment extends Fragment {
 
     private MapView mMapView;
     private MapboxMap mMap;
+    //buttons
     private FloatingActionButton mCenterLocationButton;
+    private Button clearbutton;
 
     private MarkerOptions mOriginMarkerOptions;
     private Marker mOriginMarker;
 
     private MarkerOptions mDestinationMarkerOptions;
     private Marker mDestinationMarker;
+    private Location location;
+
 
     public static MainFragment newInstance() {
         return new MainFragment();
@@ -73,22 +86,41 @@ public class MainFragment extends Fragment {
         mMapView = view.findViewById(R.id.mapView);
         mMapView.onCreate(savedInstanceState);
 
-        mCenterLocationButton = view.findViewById(R.id.centerLocationButton);
+
+        //gps button
+        mCenterLocationButton =  view.findViewById(R.id.centerLocationButton);
         mCenterLocationButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+
                 if (mOriginMarker != null) {
                     CameraPosition.Builder camPositionBuilder = new CameraPosition.Builder();
                     camPositionBuilder.target(mOriginMarker.getPosition());
                     camPositionBuilder.zoom(11.0);
-
                     mMap.setCameraPosition(camPositionBuilder.build());
                 }
+
             }
         });
 
+
+        //Clear All marker
+        clearbutton=view.findViewById(R.id.clear);
+        clearbutton.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+
+                Toast bread = Toast.makeText(getApplicationContext(), "clear all", Toast.LENGTH_LONG);
+                bread.show();
+                Log.i(LOG_TAG, "Location Cleared all!");
+                mMap.clear();
+            }
+        });
         return view;
     }
+
+
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {

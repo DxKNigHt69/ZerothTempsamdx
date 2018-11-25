@@ -3,12 +3,17 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 28
     defaultConfig {
-        applicationId "com.whereismytransport.sdktemplateapp"
-        minSdkVersion 19
+        applicationId "com.whereismytransport.zero"
+        minSdkVersion 18
         targetSdkVersion 28
         versionCode 1
         versionName "1.0"
         vectorDrawables.useSupportLibrary = true
+
+//        lintOptions {
+//            checkReleaseBuilds false // Add this
+//            abortOnError false
+//        }
     }
     buildTypes {
         release {
@@ -37,4 +42,5 @@ dependencies {
     implementation 'com.mapbox.mapboxsdk:mapbox-android-sdk:6.5.0'
 
     implementation 'com.whereismytransport.transportapisdk:transportapisdk:1.0.1'
+    implementation 'com.android.support.constraint:constraint-layout:1.1.3'
 }

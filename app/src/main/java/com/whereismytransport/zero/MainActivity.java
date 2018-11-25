@@ -1,13 +1,16 @@
-package com.whereismytransport.sdktemplateapp;
+package com.whereismytransport.zero;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProviders;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.Toast;
 
-import com.mapbox.mapboxsdk.Mapbox;
-import com.whereismytransport.sdktemplateapp.ui.main.MainFragment;
-import com.whereismytransport.sdktemplateapp.ui.main.MainViewModel;
+import com.whereismytransport.zero.ui.main.MainFragment;
+import com.whereismytransport.zero.ui.main.MainViewModel;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -27,5 +30,7 @@ public class MainActivity extends AppCompatActivity {
                     .replace(R.id.container, MainFragment.newInstance())
                     .commitNow();
         }
+
+
     }
 }

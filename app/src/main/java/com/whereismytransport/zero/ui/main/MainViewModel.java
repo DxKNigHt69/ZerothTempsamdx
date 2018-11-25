@@ -1,12 +1,12 @@
-package com.whereismytransport.sdktemplateapp.ui.main;
+package com.whereismytransport.zero.ui.main;
 
 import android.content.Context;
 import android.location.Location;
 
 import com.mapbox.mapboxsdk.geometry.LatLng;
-import com.whereismytransport.sdktemplateapp.LocationService;
-import com.whereismytransport.sdktemplateapp.R;
-import com.whereismytransport.sdktemplateapp.SDKTemplateApplication;
+import com.whereismytransport.zero.LocationService;
+import com.whereismytransport.zero.R;
+import com.whereismytransport.zero.ZerothTemplateApplication;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,6 +48,7 @@ public final class MainViewModel extends ViewModel {
 
         if (mLocationLiveData == null) {
             mLocationLiveData = new MutableLiveData<>();
+
             mLocationListener = new LocationService.LocationListener() {
                 @Override
                 public void onLocationChanged(Location location) {
@@ -62,6 +63,7 @@ public final class MainViewModel extends ViewModel {
             LocationService.getInstance().addLocationListener(mLocationListener);
             LocationService.getInstance().startLocationUpdates(context);
         }
+
 
         return mLocationLiveData;
     }
@@ -80,8 +82,8 @@ public final class MainViewModel extends ViewModel {
         mExecutor.execute(new Runnable() {
             @Override
             public void run() {
-                String clientId = SDKTemplateApplication.getContext().getString(R.string.transportApiClientId);
-                String clientSecret = SDKTemplateApplication.getContext().getString(R.string.transportApiClientSecret);
+                String clientId = ZerothTemplateApplication.getContext().getString(R.string.transportApiClientId);
+                String clientSecret = ZerothTemplateApplication.getContext().getString(R.string.transportApiClientSecret);
 
                 TransportApiClient tapiClient = new TransportApiClient(new TransportApiClientSettings(clientId, clientSecret));
 

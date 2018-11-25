@@ -1,9 +1,9 @@
-package com.whereismytransport.sdktemplateapp;
+package com.whereismytransport.zero;
 
 import android.app.Application;
 import android.content.Context;
 
-public class SDKTemplateApplication extends Application {
+public class ZerothTemplateApplication extends Application {
 
     private static Context context;
 

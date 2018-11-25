@@ -13,5 +13,6 @@
 
     <!-- Width of the line drawn on the map (itineraries/steps). -->
     <dimen name="waypoint_map_line_width">1.5dp</dimen>
+    <dimen name="fab_margin">16dp</dimen>
 
 </resources>
