@@ -1,49 +1,12 @@
-# SDKTemplateApp
+# Zeroth
 
-![WIMTLogo](https://www.whereismytransport.com/wp-content/themes/wpwimt/assets/images/logos/logo-black.svg)
 
 ### Thanks for checking out our Github profile. 
 [WhereIsMyTransport](https://www.whereismytransport.com) is all about public transport data. 
-We host our data on an API, and we've put together some resources on our Github to help people use the API.
+Thanks WhereIsMyTransport mentors.
 
-This Android app is a learning tool to help developers understand how to query the WhereIsMyTransport Journey Planner and use the relevant information in conjunction with the [Mapbox Maps SDK for Android](https://www.mapbox.com/help/first-steps-android-sdk/). 
-This app only uses one of many endpoints available on the WhereIsMyTransport API. It should be easy enough to extend this application to get the full benefit of the API.
+![WIMTLogo](https://www.whereismytransport.com/wp-content/themes/wpwimt/assets/images/logos/logo-black.svg)
 
-
-For more information on our API, and to get an access token just visit the [developer portal](https://developer.whereismytransport.com). And click on **Get Started**.
-
-To integrate your own Android application with our API check out [TransportAPISdk.Java](https://github.com/WhereIsMyTransport/TransportApiSdk.Java).
-
-## Get going
-
-1. Clone or download this project and open it in Android Studio.
-1. Log onto the developer portal and get your client key and secret.
-1. Setup your credentials for the WIMT API in /app/src/res/values/transportapisdk.xml
-
-```xml
-<resources>
-
-    <!-- Transport API Client ID, replace with your own. -->
-    <string name="transportApiClientId" translatable="false"><!-- YOUR API CLIENT ID HERE --></string>
-
-    <!-- Transport API Client Secret, replace with your own. -->
-    <string name="transportApiClientSecret" translatable="false"><!-- YOUR API CLIENT SECRET HERE --></string>
-
-</resources>
-```
-
-1. Setup your Mapbox token in /app/src/res/values/mapboxsdk.xml
-
-```xml
-<resources>
-
-    <!-- MapBox SDK Access Token, replace with your own. -->
-    <string name="mapBoxAccessToken" translatable="false"><!-- YOUR ACCESS TOKEN HERE --></string>
-
-</resources>
-```
-
-1. Hit Run! We recommend running and testing the app on a physical device rather than a virtual device.
 
 
 # Features
@@ -62,11 +25,8 @@ The template application uses our [Java SDK](https://github.com/WhereIsMyTranspo
 * An easy way to understand how to piece together a Main Activity with a Main Fragment and a MainViewModel to handle queries to the API.
 
 # Get in touch
-Get in touch with us on Support@whereismytransport.com for feature suggestions. 
+Get in touch with us on Dxwhereallends@gmail.com for feature suggestions. 
 
-# License
-SDKTemplateApp is available under the MIT license.
-We encourage you to use this code, change it, and keep it open-source.
 
 
 ![screenshot](https://github.com/WhereIsMyTransport/SDKTemplateApp/blob/master/JourneyPlanScreenshot.jpg)
