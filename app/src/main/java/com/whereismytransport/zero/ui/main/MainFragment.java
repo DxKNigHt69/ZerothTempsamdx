@@ -6,6 +6,7 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -30,9 +31,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.mapbox.api.geocoding.v5.models.CarmenFeature;
+import com.mapbox.geojson.Feature;
+import com.mapbox.geojson.FeatureCollection;
+import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.annotations.Icon;
 import com.mapbox.mapboxsdk.annotations.Marker;
@@ -42,16 +48,23 @@ import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
+import com.mapbox.mapboxsdk.plugins.places.autocomplete.PlaceAutocomplete;
+import com.mapbox.mapboxsdk.plugins.places.autocomplete.model.PlaceOptions;
+import com.mapbox.mapboxsdk.style.layers.PropertyFactory;
+import com.mapbox.mapboxsdk.style.layers.SymbolLayer;
+import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
 import com.whereismytransport.zero.BitmapHelper;
 import com.whereismytransport.zero.MapboxHelper;
 import com.whereismytransport.zero.R;
 
 import java.util.List;
 
+import static android.content.RestrictionsManager.RESULT_ERROR;
 import static com.mapbox.mapboxsdk.Mapbox.getApplicationContext;
 
 public class MainFragment extends Fragment {
     private static final String LOG_TAG = "MainFragment";
+    private static final String LOG_TAGsrc = "sourceLoc";
 
     private static final int PERMISSIONS_REQUEST_CODE = 1;
 
@@ -62,12 +75,20 @@ public class MainFragment extends Fragment {
     //buttons
     private FloatingActionButton mCenterLocationButton;
     private Button clearbutton;
+    private Button searchbutton1;
+    private EditText sourceloctn;
+    private EditText destnloctn;
+    private static final int REQUEST_CODE_src_AUTOCOMPLETE = 1;
+    private static final int REQUEST_CODE_destn_AUTOCOMPLETE = 2;
 
     private MarkerOptions mOriginMarkerOptions;
     private Marker mOriginMarker;
 
     private MarkerOptions mDestinationMarkerOptions;
     private Marker mDestinationMarker;
+    private String symbolIconId = "symbolIconId";
+    private String geojsonSourceLayerId = "geojsonSourceLayerId";
+
     private Location location;
 
 
@@ -117,7 +138,93 @@ public class MainFragment extends Fragment {
                 mMap.clear();
             }
         });
+
+        //Search the location entered
+//        //Custom
+        sourceloctn =(EditText) view.findViewById(R.id.source_loc);
+        sourceloctn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+
+                try{
+                    Intent intent = new PlaceAutocomplete.IntentBuilder()
+                            .accessToken(Mapbox.getAccessToken())
+                            .placeOptions(PlaceOptions.builder()
+                                    .backgroundColor(Color.parseColor("#EEEEEE"))
+                                    .limit(10)
+                                    .build(PlaceOptions.MODE_CARDS))
+                            .build(getActivity());
+                    startActivityForResult(intent, REQUEST_CODE_src_AUTOCOMPLETE);
+                }catch (NullPointerException ne){
+                    //logging code
+                    Log.i(LOG_TAGsrc, "Null end location Error");
+                }catch (Exception e){
+                    Log.i(LOG_TAGsrc, "Error");
+                }
+
+                //initSearchFab();
+
+            }
+
+
+        });
+
+        destnloctn =(EditText) view.findViewById(R.id.destntion_loc);
+        destnloctn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+             try{
+                 Intent intent = new PlaceAutocomplete.IntentBuilder()
+                         .accessToken(Mapbox.getAccessToken())
+                         .placeOptions(PlaceOptions.builder()
+                                 .backgroundColor(Color.parseColor("#EEEEEE"))
+                                 .limit(10)
+                                 .build(PlaceOptions.MODE_CARDS))
+                         .build(getActivity());
+                 startActivityForResult(intent, REQUEST_CODE_destn_AUTOCOMPLETE);
+             }catch (NullPointerException ne){
+                 //logging code
+                 Log.i(LOG_TAGsrc, "Null end location Error");
+             }catch (Exception e){
+                 Log.i(LOG_TAGsrc, "Error");
+             }
+
+
+                //initSearchFab();
+
+            }
+
+
+        });
+//
+//        //setupViewModelConnections
+//        Button locate=(Button) view.findViewById(R.id.locate);
+//        locate.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//
+//
+//                setupViewModelConnections();
+//
+//                //initSearchFab();
+//
+//            }
+//
+//
+//        });
+
+
+
+
+
+
+        //custom
+
+
         return view;
+
     }
 
 
@@ -157,6 +264,191 @@ public class MainFragment extends Fragment {
             });
         }
     }
+
+
+
+    //custommmmmmmmmmmmmmmmmmmmmm
+
+    private void initSearchFab() {
+        // Add the symbol layer icon to map for future use
+        Bitmap icon = BitmapFactory.decodeResource(
+                MainFragment.this.getResources(), R.drawable.ic_person_pin_circle_black_24dp);
+        mMap.addImage(symbolIconId, icon);
+
+        // Create an empty GeoJSON source using the empty feature collection
+        setUpSource();
+
+        // Set up a new symbol layer for displaying the searched location's feature coordinates
+        setupLayer();
+    }
+
+    //custommmmmmmmmmmmmmmmmmmmmmmm
+
+    private void setUpSource() {
+        GeoJsonSource geoJsonSource = new GeoJsonSource(geojsonSourceLayerId);
+        mMap.addSource(geoJsonSource);
+    }
+
+    private void setupLayer() {
+        SymbolLayer selectedLocationSymbolLayer = new SymbolLayer("SYMBOL_LAYER_ID", geojsonSourceLayerId);
+        selectedLocationSymbolLayer.withProperties(PropertyFactory.iconImage(symbolIconId));
+        mMap.addLayer(selectedLocationSymbolLayer);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_CODE_src_AUTOCOMPLETE) {
+            if (resultCode == Activity.RESULT_OK) {
+
+
+                sourceloctn.setText(PlaceAutocomplete.getPlace(data).text());
+                sourceloctn.setTextColor(Color.BLACK);
+
+                mMap.clear();
+                //Retrieve selected location's CarmenFeature
+                CarmenFeature selectedCarmenFeature = PlaceAutocomplete.getPlace(data);
+
+                LatLng srcLctn=new LatLng(((Point) selectedCarmenFeature.geometry()).latitude(),
+                        ((Point) selectedCarmenFeature.geometry()).longitude());
+
+
+                // Create a new FeatureCollection and add a new Feature to it using selectedCarmenFeature above
+                FeatureCollection featureCollection = FeatureCollection.fromFeatures(
+                        new Feature[]{Feature.fromJson(selectedCarmenFeature.toJson())});
+
+                // Retrieve and update the source designated for showing a selected location's symbol layer icon
+                GeoJsonSource source = mMap.getSourceAs(geojsonSourceLayerId);
+                if (source != null) {
+                    source.setGeoJson(featureCollection);
+                }
+                if (mOriginMarker == null) {
+                    final int markerWidth = getContext().getResources().getDimensionPixelSize(R.dimen.waypoint_end_map_marker_width);
+                    final int markerHeight = getContext().getResources().getDimensionPixelSize(R.dimen.waypoint_end_map_marker_height);
+
+                    Icon icon = BitmapHelper.getVectorAsMapBoxIcon(getContext(), R.drawable.ic_map_pin_a, markerWidth, markerHeight);
+                    MarkerOptions markerOptions = new MarkerOptions();
+                    markerOptions.setIcon(icon);
+
+                    markerOptions.setPosition(srcLctn);
+                    mOriginMarker = mMap.addMarker(markerOptions);
+                    mOriginMarkerOptions = markerOptions;
+                } else {
+
+                    mOriginMarker = mMap.addMarker(mOriginMarkerOptions);
+                    mOriginMarker.setPosition(srcLctn);
+                    mOriginMarkerOptions.setPosition(srcLctn);
+
+                }
+
+                CameraPosition.Builder camPositionBuilder = new CameraPosition.Builder();
+                camPositionBuilder.target(mOriginMarker.getPosition());
+                camPositionBuilder.zoom(11.0);
+
+
+                mMap.setCameraPosition(camPositionBuilder.build());
+
+                //start loctn setup
+
+                Location srcLctnMarker=new Location("startPoint");
+                srcLctnMarker.setLatitude(srcLctn.getLatitude());
+                srcLctnMarker.setLongitude(srcLctn.getLongitude());
+                mViewModel.setStrtLocation(srcLctnMarker);
+
+                // Retrieve selected location's CarmenFeature
+//            CarmenFeature selectedCarmenFeature = PlaceAutocomplete.getPlace(data);
+//
+//            // Create a new FeatureCollection and add a new Feature to it using selectedCarmenFeature above
+//            FeatureCollection featureCollection = FeatureCollection.fromFeatures(
+//                    new Feature[]{Feature.fromJson(selectedCarmenFeature.toJson())});
+//
+//            // Retrieve and update the source designated for showing a selected location's symbol layer icon
+//            GeoJsonSource source = mMap.getSourceAs(geojsonSourceLayerId);
+//            if (source != null) {
+//                source.setGeoJson(featureCollection);
+//            }
+//
+//            // Move map camera to the selected location
+//            CameraPosition newCameraPosition = new CameraPosition.Builder()
+//                    .target(new LatLng(((Point) selectedCarmenFeature.geometry()).latitude(),
+//                            ((Point) selectedCarmenFeature.geometry()).longitude()))
+//                    .zoom(14)
+//                    .build();
+//            mMap.animateCamera(CameraUpdateFactory.newCameraPosition(newCameraPosition), 4000);
+            }
+            else if(resultCode == RESULT_ERROR){
+                sourceloctn.requestFocus();
+                // TODO: Handle the error.
+                Log.i(LOG_TAGsrc, "Error");
+            }
+
+        }else if(requestCode == REQUEST_CODE_destn_AUTOCOMPLETE){
+            if (resultCode == Activity.RESULT_OK) {
+
+
+                destnloctn.setText(PlaceAutocomplete.getPlace(data).text());
+                destnloctn.setTextColor(Color.BLACK);
+
+                //Retrieve selected location's CarmenFeature
+                CarmenFeature selectedCarmenFeature = PlaceAutocomplete.getPlace(data);
+                LatLng destnLctn=new LatLng(((Point) selectedCarmenFeature.geometry()).latitude(),
+                        ((Point) selectedCarmenFeature.geometry()).longitude());
+                mViewModel.setEndLocation(destnLctn);
+
+//                mMap.clear();
+//                //Retrieve selected location's CarmenFeature
+//                CarmenFeature selectedCarmenFeature = PlaceAutocomplete.getPlace(data);
+//
+//                LatLng srcLctn=new LatLng(((Point) selectedCarmenFeature.geometry()).latitude(),
+//                        ((Point) selectedCarmenFeature.geometry()).longitude());
+//
+//                // Create a new FeatureCollection and add a new Feature to it using selectedCarmenFeature above
+//                FeatureCollection featureCollection = FeatureCollection.fromFeatures(
+//                        new Feature[]{Feature.fromJson(selectedCarmenFeature.toJson())});
+//
+//                // Retrieve and update the source designated for showing a selected location's symbol layer icon
+//                GeoJsonSource source = mMap.getSourceAs(geojsonSourceLayerId);
+//                if (source != null) {
+//                    source.setGeoJson(featureCollection);
+//                }
+//
+//                if (mDestinationMarker == null) {
+//                    final int markerWidth = getContext().getResources().getDimensionPixelSize(R.dimen.waypoint_end_map_marker_width);
+//                    final int markerHeight = getContext().getResources().getDimensionPixelSize(R.dimen.waypoint_end_map_marker_height);
+//
+//                    Icon icon = BitmapHelper.getVectorAsMapBoxIcon(getContext(), R.drawable.ic_map_pin_a, markerWidth, markerHeight);
+//                    MarkerOptions markerOptions = new MarkerOptions();
+//                    markerOptions.setIcon(icon);
+//
+//                    markerOptions.setPosition(srcLctn);
+//                    mDestinationMarker = mMap.addMarker(markerOptions);
+//                    mDestinationMarkerOptions = markerOptions;
+//                } else {
+//
+//                    mDestinationMarker = mMap.addMarker(mDestinationMarkerOptions);
+//                    mDestinationMarker.setPosition(srcLctn);
+//                    mDestinationMarkerOptions.setPosition(srcLctn);
+//
+//                }
+//
+//                CameraPosition.Builder camPositionBuilder = new CameraPosition.Builder();
+//                camPositionBuilder.target(mDestinationMarker.getPosition());
+//                camPositionBuilder.zoom(11.0);
+//
+//                mMap.setCameraPosition(camPositionBuilder.build());
+            }
+            else if(resultCode == RESULT_ERROR){
+
+                // TODO: Handle the error.
+                Log.i(LOG_TAGsrc, "Error");
+
+            }
+        }
+    }
+
+    ///custommmmmmmmmmmmmmmmmmmmmm
+
+
 
     // Observe LiveData from the MainViewModel.
     private void setupViewModelConnections() {

@@ -2,6 +2,8 @@ package com.whereismytransport.zero.ui.main;
 
 import android.content.Context;
 import android.location.Location;
+import android.util.Log;
+import android.widget.Toast;
 
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.whereismytransport.zero.LocationService;
@@ -26,6 +28,7 @@ import transportapisdk.models.Journey;
 
 public final class MainViewModel extends ViewModel {
 
+    private static final String LOG_TAGsrc = "hello";
     private final Executor mExecutor = Executors.newSingleThreadExecutor();
 
     private boolean startLocationSet;
@@ -78,10 +81,15 @@ public final class MainViewModel extends ViewModel {
 
     public void setEndLocation(LatLng location) {
         mEndLocationLiveData.postValue(location);
+//        double startLongitude = mStartLocationLiveData.getValue().getLongitude();
+//        double startLatitude = mStartLocationLiveData.getValue().getLatitude();
+//        double endLongitude = location.getLongitude();
+//        double endLatitude = location.getLatitude();
 
-        mExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
+
+
+        try{
+            mExecutor.execute(() -> {
                 String clientId = ZerothTemplateApplication.getContext().getString(R.string.transportApiClientId);
                 String clientSecret = ZerothTemplateApplication.getContext().getString(R.string.transportApiClientSecret);
 
@@ -89,8 +97,9 @@ public final class MainViewModel extends ViewModel {
 
                 double startLongitude = mStartLocationLiveData.getValue().getLongitude();
                 double startLatitude = mStartLocationLiveData.getValue().getLatitude();
-                double endLongitude = mEndLocationLiveData.getValue().getLongitude();
-                double endLatitude = mEndLocationLiveData.getValue().getLatitude();
+                double endLongitude = location.getLongitude();
+                double endLatitude = location.getLatitude();
+
 
                 // Let's restrict our Journey call to only some Modes.
                 List<String> onlyModes = new ArrayList<>();
@@ -124,9 +133,27 @@ public final class MainViewModel extends ViewModel {
                 List<Itinerary> itineraries = journeyResult.data.getItineraries();
 
                 mItinerariesLiveData.postValue(itineraries);
-            }
-        });
+            });
+        }catch(NullPointerException e1){
+            //logging code
+            Log.i(LOG_TAGsrc, "Null end location Error");
+        }catch (Exception e){
+            Log.i(LOG_TAGsrc, "Error");
+        }
+
     }
+
+
+    //cutommmmmmmmmmmmmmmmmm
+
+    public void setStrtLocation(Location strtLocation){
+
+
+        mStartLocationLiveData.postValue(strtLocation);
+    }
+
+    //cutommmmmmmmmmmmmmmmmm
+
 
     public LiveData<List<Itinerary>> getItineraries() {
         return mItinerariesLiveData;
