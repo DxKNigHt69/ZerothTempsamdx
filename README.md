@@ -28,6 +28,6 @@ The template application uses our [Java SDK](https://github.com/WhereIsMyTranspo
 Get in touch with us on Dxwhereallends@gmail.com for feature suggestions. 
 
 
-![screenshot](https://github.com/DxKNigHt69/ZerothTempsamdx/blob/master/JourneyPlanScreenshot.jpg)
+![screenshot](https://github.com/DxKNigHt69/ZerothTempsamdx/blob/master/JourneyPlanScreenshot.jpg=720x320)
     
 # Zeroth project
