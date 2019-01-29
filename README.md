@@ -29,6 +29,6 @@ Get in touch with us on Dxwhereallends@gmail.com for feature suggestions.
 
 
 
-![screenshot](https://github.com/DxKNigHt69/ZerothTempsamdx/blob/master/JourneyPlanScreenshot.jpg")
+<img src="https://github.com/DxKNigHt69/ZerothTempsamdx/blob/master/JourneyPlanScreenshot.jpg" width="50%"/>
     
 # Zeroth project
