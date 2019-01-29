@@ -29,6 +29,6 @@ Get in touch with us on Dxwhereallends@gmail.com for feature suggestions.
 
 
 
-![screenshot](https://github.com/WhereIsMyTransport/SDKTemplateApp/blob/master/JourneyPlanScreenshot.jpg)
+![screenshot](https://github.com/DxKNigHt69/ZerothTempsamdx/blob/master/JourneyPlanScreenshot.jpg")
     
 # Zeroth project
